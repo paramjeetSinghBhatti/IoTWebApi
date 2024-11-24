@@ -21,9 +21,37 @@ stages:
       vmImage: ubuntu-latest
     steps:
     - task: Docker@2
-      displayName: Build an image
+      displayName: Build Web API Docker Image
       inputs:
-        command: build
-        dockerfile: '$(Build.SourcesDirectory)/Dockerfile'
+        containerRegistry: 'PSBhatti Docker'
+        repository: 'psbhatti/iotwebapi'
+        command: 'buildAndPush'
+        Dockerfile: '**/Dockerfile'
         tags: |
           $(tag)
+        addBaseImageData: false       
+- stage: Provision
+  displayName: 'terraforming on Azure'
+  dependsOn: Build
+  jobs:
+    - job: Provision
+      displayName: 'Provisioning Azure resources'
+      pool:
+        vmImage: 'ubuntu-latest'
+      variables:
+        - group: TerrformEnVariables
+      steps:
+        - script: |
+            set -e
+
+            terraform init -input=false
+            terraform apply -input=false -auto-approve
+          name: 'RunTerraform'
+          displayName: 'Run Terraform'
+          env:
+            ARM_CLIENT_ID: $(ARM_CLIENT_ID)
+            ARM_CLIENT_SECRET: $(ARM_CLIENT_SECRET)
+            ARM_SUBSCRIPTION_ID: $(ARM_SUBSCRIPTION_ID)
+            ARM_TENANT_ID: $(ARM_TENANT_ID)
+            TF_VAR_imagebuild: $(tag)
+            TF_VAR_DB_PASSWORD: $(DB_PASSWORD)
