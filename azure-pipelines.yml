@@ -3,70 +3,74 @@
 # https://docs.microsoft.com/azure/devops/pipelines/languages/docker
 
 trigger:
-- main
+  - main
 
 resources:
-- repo: self
+  - repo: self
 
 variables:
-  tag: '$(Build.BuildId)'
+    tag: '$(Build.BuildId)'
 
 stages:
-- stage: Build
-  displayName: Build image
-  jobs:
-  - job: Build
-    displayName: Build
-    pool:
-      vmImage: ubuntu-latest
-    steps:
-    - task: Docker@2
-      displayName: Build Web API Docker Image
-      inputs:
-        containerRegistry: 'PSBhatti Docker'
-        repository: 'psbhatti/iotwebapi'
-        command: 'buildAndPush'
-        Dockerfile: '**/Dockerfile'
-        tags: |
-          $(tag)
-        addBaseImageData: false       
-- stage: Provision
-  displayName: 'terraforming on Azure'
-  dependsOn: Build
-  jobs:
-    - job: Provision
-      displayName: 'Provisioning Azure resources'
+  - stage: Build
+    displayName: Build image
+    jobs:
+    - job: Build
+      displayName: Build
       pool:
-        vmImage: 'ubuntu-latest'
-      variables:
-        - group: IoTVariables
+        vmImage: ubuntu-latest
       steps:
-        - script: |
-            set -e
-
-            terraform init -input=false
-            terraform apply -input=false -auto-approve
-          name: 'RunTerraform'
-          displayName: 'Run Terraform'
-          env:
-            ARM_CLIENT_ID: $(ARM_CLIENT_ID)
-            ARM_CLIENT_SECRET: $(ARM_CLIENT_SECRET)
-            ARM_SUBSCRIPTION_ID: $(ARM_SUBSCRIPTION_ID)
-            ARM_TENANT_ID: $(ARM_TENANT_ID)
-            TF_VAR_imagebuild: $(tag)
-            TF_VAR_DB_PASSWORD: $(DB_PASSWORD)
-        - script: |
-            echo "Installing dotnet-ef tool..."
-            dotnet tool install --global dotnet-ef
-            echo "Adding .NET tools to PATH..."
-            echo "::add-path::$(Agent.ToolsDirectory)/dotnet/tools"
-          displayName: 'Install dotnet-ef'
-        # Add EF Core migration step after provisioning
-        - script: |
-            echo "Applying EF Core Migrations..."
-            dotnet ef database update --project $(Build.SourcesDirectory)/YourProject.csproj
-          displayName: 'Apply EF Core Migrations'
-          env:
-            DOTNET_CLI_HOME: $(Agent.TempDirectory)
-            DB_PASSWORD: $(DB_PASSWORD)  # Ensure DB_PASSWORD is available
-            DB_SERVER_IP: $(iot_sql_server_ip)  # Ensure IP is fetched from Terraform output or env
+      - task: Docker@2
+        displayName: Build Web API Docker Image
+        inputs:
+          containerRegistry: 'PSBhatti Docker'
+          repository: 'psbhatti/iotwebapi'
+          command: 'buildAndPush'
+          Dockerfile: '**/Dockerfile'
+          tags: |
+            $(tag)
+          addBaseImageData: false
+  - stage: Provision
+    displayName: 'terraforming on Azure'
+    dependsOn: Build
+    jobs:
+      - job: Provision
+        displayName: 'Provisioning Azure resources'
+        pool:
+          vmImage: 'ubuntu-latest'
+        variables:
+          - group: IoTVariables
+        steps:
+          - script: |
+              set -e
+  
+              terraform init -input=false
+              terraform apply -input=false -auto-approve
+            name: 'RunTerraform'
+            displayName: 'Run Terraform'
+            env:
+              ARM_CLIENT_ID: $(ARM_CLIENT_ID)
+              ARM_CLIENT_SECRET: $(ARM_CLIENT_SECRET)
+              ARM_SUBSCRIPTION_ID: $(ARM_SUBSCRIPTION_ID)
+              ARM_TENANT_ID: $(ARM_TENANT_ID)
+              TF_VAR_imagebuild: $(tag)
+              TF_VAR_DB_PASSWORD: $(DB_PASSWORD)
+          - script: |
+              echo "Installing dotnet-ef tool..."
+              dotnet tool install --global dotnet-ef
+              echo "Adding .NET tools to PATH..."
+              echo "::add-path::$(Agent.ToolsDirectory)/dotnet/tools"
+            displayName: 'Install dotnet-ef'
+          - script: |
+              echo "Listing project files..."
+              ls -R $(Build.SourcesDirectory)
+            displayName: 'List Directory Structure'
+          # Add EF Core migration step after provisioning
+          - script: |
+              echo "Applying EF Core Migrations..."
+              dotnet ef database update --project $(Build.SourcesDirectory)/YourProject.csproj
+            displayName: 'Apply EF Core Migrations'
+            env:
+              DOTNET_CLI_HOME: $(Agent.TempDirectory)
+              DB_PASSWORD: $(DB_PASSWORD)  # Ensure DB_PASSWORD is available
+              DB_SERVER_IP: $(iot_sql_server_ip)  # Ensure IP is fetched from Terraform output or env
