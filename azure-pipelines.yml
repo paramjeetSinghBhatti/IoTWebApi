@@ -55,3 +55,12 @@ stages:
             ARM_TENANT_ID: $(ARM_TENANT_ID)
             TF_VAR_imagebuild: $(tag)
             TF_VAR_DB_PASSWORD: $(DB_PASSWORD)
+        # Add EF Core migration step after provisioning
+        - script: |
+            echo "Applying EF Core Migrations..."
+            dotnet ef database update --project $(Build.SourcesDirectory)/YourProject.csproj
+          displayName: 'Apply EF Core Migrations'
+          env:
+            DOTNET_CLI_HOME: $(Agent.TempDirectory)
+            DB_PASSWORD: $(DB_PASSWORD)  # Ensure DB_PASSWORD is available
+            DB_SERVER_IP: $(iot_sql_server_ip)  # Ensure IP is fetched from Terraform output or env
