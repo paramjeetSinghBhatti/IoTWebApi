@@ -32,7 +32,13 @@ app.MapPost("/iot/telemetry", async (Weather weather, WeatherDbContext dbContext
 {
     dbContext.Save(weather);
     await dbContext.SaveChangesAsync();
-    return Results.Ok("Weather message was saved.");
+    return Results.Created();
+
+});
+
+app.MapGet("/iot/telemetry", () =>
+{
+    return Results.Ok("I am working api.");
 
 });
 
