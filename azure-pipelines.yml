@@ -65,10 +65,14 @@ stages:
               echo "Listing project files..."
               ls -R $(Build.SourcesDirectory)
             displayName: 'List Directory Structure'
+          - script: |
+              echo "Env Variable values"
+              echo $(DB_PASSWORD)
+              echo $(iot_sql_server_ip)
           # Add EF Core migration step after provisioning
           - script: |
               echo "Applying EF Core Migrations..."
-              dotnet ef database update --project $(Build.SourcesDirectory)/IoTWebApi.csproj
+              dotnet ef database update --project $(Build.SourcesDirectory)/IoTWebApi.csproj --verbose
             displayName: 'Apply EF Core Migrations'
             env:
               DOTNET_CLI_HOME: $(Agent.TempDirectory)
