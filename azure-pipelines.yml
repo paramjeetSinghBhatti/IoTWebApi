@@ -55,6 +55,12 @@ stages:
             ARM_TENANT_ID: $(ARM_TENANT_ID)
             TF_VAR_imagebuild: $(tag)
             TF_VAR_DB_PASSWORD: $(DB_PASSWORD)
+        - script: |
+            echo "Installing dotnet-ef tool..."
+            dotnet tool install --global dotnet-ef
+            echo "Adding .NET tools to PATH..."
+            echo "::add-path::$(Agent.ToolsDirectory)/dotnet/tools"
+          displayName: 'Install dotnet-ef'
         # Add EF Core migration step after provisioning
         - script: |
             echo "Applying EF Core Migrations..."
