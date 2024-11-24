@@ -39,7 +39,7 @@ stages:
       pool:
         vmImage: 'ubuntu-latest'
       variables:
-        - group: TerrformEnVariables
+        - group: IoTVariables
       steps:
         - script: |
             set -e
