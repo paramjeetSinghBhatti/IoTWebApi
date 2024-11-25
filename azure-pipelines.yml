@@ -48,7 +48,7 @@ stages:
               terraform apply -input=false -auto-approve
               terraform output -json > tf_outputs.json
               DB_SERVER=$(jq -r '.iot_sql_server_ip.value' tf_outputs.json)
-              echo "##vso[task.setvariable name=DB_SERVER;]$DB_SERVER"
+              echo "##vso[task.setvariable name=DB_SERVER;value=$DB_SERVER]"
             name: 'RunTerraform'
             displayName: 'Run Terraform'
             env:
