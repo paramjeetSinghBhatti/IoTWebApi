@@ -112,14 +112,5 @@ resource "azurerm_container_group" "iot_container_grp" {
       port     = 8080
       protocol = "TCP"
     }
-
-    provisioner "local-exec" {
-      command = <<EOT
-        sed -i "s|\${DB_SERVER}|${azurerm_container_group.sql_server_container.ip_address}|g" /app/appsettings.production.json
-        sed -i "s|\${DB_NAME}|${var.DB_NAME}|g" /app/appsettings.production.json
-        sed -i "s|\${DB_USER}|${var.DB_USER}" /app/appsettings.production.json
-        sed -i "s|\${DB_PASSWORD}|${var.DB_PASSWORD}|g" /app/appsettings.production.json
-      EOT
-    }
   }
 }

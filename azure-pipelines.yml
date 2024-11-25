@@ -82,9 +82,3 @@ stages:
               echo "Applying EF Core Migrations..."
               dotnet ef database update --project $(Build.SourcesDirectory)/IoTWebApi.csproj --verbose
             displayName: 'Apply EF Core Migrations'
-            env:
-              DOTNET_CLI_HOME: $(Agent.TempDirectory)
-              DB_PASSWORD: $(DB_PASSWORD)  # Ensure DB_PASSWORD is available
-              DB_SERVER: $(DB_SERVER)  # Ensure DB_SERVER is fetched dynamically from Terraform output
-              DB_USER: $(DB_User)
-              DB_NAME: $(DB_Name)

@@ -23,8 +23,11 @@ WORKDIR /app
 # Copy the compiled files from the build stage
 COPY --from=build-env /app/out .
 
+# Copy the entrypoint script
+COPY entrypoint.sh /app/entrypoint.sh
+
 ## Expose the port that the application listens on
 EXPOSE 8080
 
 # Specify the entry point to run the application
-ENTRYPOINT ["dotnet", "IoTWebApi.dll"]
+ENTRYPOINT ["/app/entrypoint.sh"]
