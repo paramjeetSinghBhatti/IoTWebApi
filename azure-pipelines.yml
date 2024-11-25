@@ -62,13 +62,11 @@ stages:
               TF_VAR_DB_USER: $(DB_USER)
               TF_VAR_DB_NAME: $(DB_NAME)
 
-          # Use ReplaceTokens for variable substitution in JSON files
-          - task: FileTransform@2
+          - task: FileTransform@1
             inputs:
               folderPath: '$(System.DefaultWorkingDirectory)'
-              enableXmlTransform: false
-              jsonTargetFiles: '**/appsettings.production.json'
-            displayName: 'Substitute Variables in appsettings.production.json'
+              fileType: 'json'
+              targetFiles: '**/appsettings.production.json'
 
           - script: |
               echo "Installing dotnet-ef tool..."
