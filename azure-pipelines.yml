@@ -62,10 +62,6 @@ stages:
               echo "::add-path::$(Agent.ToolsDirectory)/dotnet/tools"
             displayName: 'Install dotnet-ef'
           - script: |
-              echo "Listing project files..."
-              ls -R $(Build.SourcesDirectory)
-            displayName: 'List Directory Structure'
-          - script: |
               echo "Env Variable values"
               echo "Db Password::" $(DB_PASSWORD)
               echo "sql server ip::" $(iot_sql_server_ip)
@@ -82,4 +78,4 @@ stages:
             env:
               DOTNET_CLI_HOME: $(Agent.TempDirectory)
               DB_PASSWORD: $(DB_PASSWORD)  # Ensure DB_PASSWORD is available
-              DB_SERVER_IP: $(iot_sql_server_ip)  # Ensure IP is fetched from Terraform output or env
+              DB_SERVER: $(iot_sql_server_ip)  # Ensure IP is fetched from Terraform output or env
