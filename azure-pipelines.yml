@@ -73,8 +73,8 @@ stages:
     dependsOn: Provision
     condition: succeeded()
     variables:
-      IOT_CONTAINER_NAME: $[dependencies.Provision.outputs['Provision.IOT_CONTAINER_NAME']]
-      REMOTE_DOCKER_HOST: $[dependencies.Provision.outputs['Provision.REMOTE_DOCKER_HOST']]
+      IOT_CONTAINER_NAME: $[dependencies.Provision.outputs['RunTerraform.IOT_CONTAINER_NAME']]
+      REMOTE_DOCKER_HOST: $[dependencies.Provision.outputs['RunTerraform.REMOTE_DOCKER_HOST']]
     jobs:
     - job: Migrate
       displayName: Apply EF Core Migrations
