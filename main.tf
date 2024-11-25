@@ -85,11 +85,6 @@ output "iot_sql_server_ip" {
   value = azurerm_container_group.sql_server_container.ip_address
 }
 
-# Output the container name of the iot web api
-output "iot_webapi_container" {
-  value = azurerm_container_group.iot_container_grp.name
-}
-
 # Web API in a Container
 resource "azurerm_container_group" "iot_container_grp" {
   depends_on = [azurerm_container_group.sql_server_container]
@@ -119,3 +114,13 @@ resource "azurerm_container_group" "iot_container_grp" {
     }
   }
 }
+
+# Output the container name of the iot web api
+output "iot_webapi_container" {
+  value = azurerm_container_group.iot_container_grp.name
+}
+
+# Output the DNS name of the Web API container
+output "iot_webapi_dns_name" {
+  value       = azurerm_container_group.iot_container_grp.fqdn
+  description = "The DNS name of the Web API container."
