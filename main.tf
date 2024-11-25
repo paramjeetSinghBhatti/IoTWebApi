@@ -124,3 +124,4 @@ output "iot_webapi_container" {
 output "iot_webapi_dns_name" {
   value       = azurerm_container_group.iot_container_grp.fqdn
   description = "The DNS name of the Web API container."
+}
