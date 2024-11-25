@@ -26,11 +26,5 @@ COPY --from=build-env /app/out .
 ## Expose the port that the application listens on
 EXPOSE 8080
 
-# Set environment variables for database configuration (these can be overridden at runtime)
-ENV DB_SERVER=${DB_SERVER}
-ENV DB_NAME=${DB_NAME}
-ENV DB_USER=${DB_USER}
-ENV DB_PASSWORD=${DB_PASSWORD}
-
 # Specify the entry point to run the application
 ENTRYPOINT ["dotnet", "IoTWebApi.dll"]

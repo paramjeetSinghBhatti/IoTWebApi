@@ -62,12 +62,6 @@ stages:
               TF_VAR_DB_USER: $(DB_USER)
               TF_VAR_DB_NAME: $(DB_NAME)
 
-          - task: FileTransform@1
-            inputs:
-              folderPath: '$(System.DefaultWorkingDirectory)'
-              fileType: 'json'
-              targetFiles: '**/appsettings.Production.json'
-
           - script: |
               echo "Installing dotnet-ef tool..."
               dotnet tool install --global dotnet-ef
