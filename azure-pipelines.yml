@@ -71,6 +71,14 @@ stages:
               echo "Adding .NET tools to PATH..."
               echo "::add-path::$(Agent.ToolsDirectory)/dotnet/tools"
             displayName: 'Install dotnet-ef'
+          # EF Core Migration Step
+          - script: |
+              echo "Setting environment to Production"
+              export ASPNETCORE_ENVIRONMENT=Production
+              echo "Applying EF Core Migrations..."
+              docker exec -e ASPNETCORE_ENVIRONMENT=Production $(IOT_CONTAINER_NAME) dotnet ef database update --verbose
+            displayName: 'Apply EF Core Migrations'
+
           - script: |
               echo "Env Variable values"
               echo "Db Password::" $(DB_PASSWORD)
@@ -78,13 +86,3 @@ stages:
               echo "Db Serverp::" $(DB_SERVER)
               echo "Db User::" $(DB_User)
               echo "Db Name::" $(DB_Name)
-          # Add EF Core migration step after provisioning
-          - script: |
-              echo "Setting environment to Production"
-              export ASPNETCORE_ENVIRONMENT=Production
-              echo "Current ASPNETCORE_ENVIRONMENT: $ASPNETCORE_ENVIRONMENT"
-              cat $(Build.SourcesDirectory)/appsettings.Production.json
-              echo "Applying EF Core Migrations..."
-          - script: |
-              docker exec -e ASPNETCORE_ENVIRONMENT=Production $(IOT_CONTAINER_NAME) dotnet ef database update --verbose
-              displayName: 'Apply EF Core Migrations'
