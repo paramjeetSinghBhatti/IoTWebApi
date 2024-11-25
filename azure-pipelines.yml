@@ -79,6 +79,8 @@ stages:
           - script: |
               echo "Setting environment to Production"
               export ASPNETCORE_ENVIRONMENT=Production
+              echo "Current ASPNETCORE_ENVIRONMENT: $ASPNETCORE_ENVIRONMENT"
+              cat $(Build.SourcesDirectory)/appsettings.production.json
               echo "Applying EF Core Migrations..."
-              dotnet ef database update --project $(Build.SourcesDirectory)/IoTWebApi.csproj --verbose
+              dotnet ef database update --project $(Build.SourcesDirectory)/IoTWebApi.csproj --environment Production --verbose
             displayName: 'Apply EF Core Migrations'
