@@ -26,6 +26,9 @@ COPY --from=build-env /app/out .
 # Copy the entrypoint script
 COPY entrypoint.sh /app/entrypoint.sh
 
+# Ensure the script is executable
+RUN chmod +x /app/entrypoint.sh
+
 ## Expose the port that the application listens on
 EXPOSE 8080
 
