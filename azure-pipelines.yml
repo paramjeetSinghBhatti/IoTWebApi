@@ -65,6 +65,10 @@ stages:
               TF_VAR_DB_PASSWORD: $(DB_PASSWORD)
               TF_VAR_DB_USER: $(DB_USER)
               TF_VAR_DB_NAME: $(DB_NAME)
+          - script: |
+              echo "Docker Containers After Provision:"
+              docker ps -a
+            displayName: 'Check Docker Containers'
 
   - stage: Migrate
     displayName: Apply EF Core Migrations
