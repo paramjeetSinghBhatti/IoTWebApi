@@ -69,6 +69,10 @@ stages:
               echo "Docker Containers After Provision:"
               docker ps -a
             displayName: 'Check Docker Containers'
+          - script: |
+              echo "Checking Docker Daemon Status..."
+              docker info
+            displayName: 'Verify Docker Daemon'
 
   - stage: Migrate
     displayName: Apply EF Core Migrations
