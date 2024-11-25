@@ -48,8 +48,11 @@ stages:
               terraform apply -input=false -auto-approve
               terraform output -json > tf_outputs.json
               DB_SERVER=$(jq -r '.iot_sql_server_ip.value' tf_outputs.json)
+              IOT_CONTAINER_NAME=$(jq -r '.iot_webapi_container.value' tf_outputs.json)
               echo "Extracted DB_SERVER value: $DB_SERVER"
+              echo "Extracted container name value: $IOT_CONTAINER_NAME"
               echo "##vso[task.setvariable variable=DB_SERVER;]$DB_SERVER"
+              echo "##vso[task.setvariable variable=IOT_CONTAINER_NAME;]$IOT_CONTAINER_NAME"
             name: 'RunTerraform'
             displayName: 'Run Terraform'
             env:
@@ -82,5 +85,6 @@ stages:
               echo "Current ASPNETCORE_ENVIRONMENT: $ASPNETCORE_ENVIRONMENT"
               cat $(Build.SourcesDirectory)/appsettings.Production.json
               echo "Applying EF Core Migrations..."
-              dotnet ef database update --project $(Build.SourcesDirectory)/IoTWebApi.csproj --environment Production --verbose
-            displayName: 'Apply EF Core Migrations'
+          - script: |
+              docker exec -e ASPNETCORE_ENVIRONMENT=Production $(IOT_CONTAINER_NAME) dotnet ef database update --verbose
+              displayName: 'Apply EF Core Migrations'
