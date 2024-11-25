@@ -66,7 +66,7 @@ stages:
             inputs:
               folderPath: '$(System.DefaultWorkingDirectory)'
               fileType: 'json'
-              targetFiles: '**/appsettings.production.json'
+              targetFiles: '**/appsettings.Production.json'
 
           - script: |
               echo "Installing dotnet-ef tool..."
