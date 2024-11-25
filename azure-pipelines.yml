@@ -67,9 +67,11 @@ stages:
             displayName: 'List Directory Structure'
           - script: |
               echo "Env Variable values"
-              echo "Db Password::"$(DB_PASSWORD)
-              echo "sql server ip::"$(iot_sql_server_ip)
-              echo "Db Serverp::"$(DB_SERVER)
+              echo "Db Password::" $(DB_PASSWORD)
+              echo "sql server ip::" $(iot_sql_server_ip)
+              echo "Db Serverp::" $(DB_SERVER)
+              echo "Db User::" $(DB_User)
+              echo "Db Name::" $(DB_Name)
           # Add EF Core migration step after provisioning
           - script: |
               echo "Setting environment to Production"

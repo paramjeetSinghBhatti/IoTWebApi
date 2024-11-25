@@ -75,6 +75,7 @@ output "iot_sql_server_ip" {
 
 # Web API in a Container
 resource "azurerm_container_group" "iot_container_grp" {
+  depends_on = [azurerm_container_group.sql_server_container]
   name                = "webapi-container"
   resource_group_name = azurerm_resource_group.IotSample.name
   location            = azurerm_resource_group.IotSample.location
@@ -89,7 +90,7 @@ resource "azurerm_container_group" "iot_container_grp" {
     memory = 1
 
     environment_variables = {
-      "DB_SERVER"   = azurerm_container_group.sql_server_container.ip_address
+      "DB_SERVER"   = vazurerm_container_group.sql_server_container.ip_address
       "DB_NAME"     = "WeatherDb"
       "DB_USER"     = "sa"
       "DB_PASSWORD" = var.DB_PASSWORD # Match MSSQL_SA_PASSWORD from SQL container
