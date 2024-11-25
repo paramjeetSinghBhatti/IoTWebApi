@@ -58,6 +58,8 @@ stages:
               ARM_TENANT_ID: $(ARM_TENANT_ID)
               TF_VAR_imagebuild: $(tag)
               TF_VAR_DB_PASSWORD: $(DB_PASSWORD)
+              TF_VAR_DB_USER: $(DB_USER)
+              TF_VAR_DB_NAME: $(DB_NAME)
           - script: |
               echo "Installing dotnet-ef tool..."
               dotnet tool install --global dotnet-ef
