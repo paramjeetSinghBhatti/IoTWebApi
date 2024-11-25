@@ -46,6 +46,9 @@ stages:
   
               terraform init -input=false
               terraform apply -input=false -auto-approve
+              terraform output -json > tf_outputs.json
+              DB_SERVER=$(jq -r '.iot_sql_server_ip.value' tf_outputs.json)
+              echo "##vso[task.setvariable name=DB_SERVER;]$DB_SERVER"
             name: 'RunTerraform'
             displayName: 'Run Terraform'
             env:
@@ -78,4 +81,6 @@ stages:
             env:
               DOTNET_CLI_HOME: $(Agent.TempDirectory)
               DB_PASSWORD: $(DB_PASSWORD)  # Ensure DB_PASSWORD is available
-              DB_SERVER: $(iot_sql_server_ip)  # Ensure IP is fetched from Terraform output or env
+              DB_SERVER: $(DB_SERVER)  # Ensure DB_SERVER is fetched dynamically from Terraform output
+              DB_USER: $(DB_User)
+              DB_NAME: $(DB_Name)

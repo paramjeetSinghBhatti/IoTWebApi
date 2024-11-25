@@ -33,6 +33,18 @@ variable "DB_PASSWORD" {
   sensitive   = true
 }
 
+variable "DB_USER" {
+  description = "The database user for the SQL Server."
+  type        = string
+  sensitive   = false
+}
+
+variable "DB_NAME" {
+  description = "The database name for the SQL Server."
+  type        = string
+  sensitive   = false
+}
+
 variable "imagebuild" {
   type        = string
   description = "Latest build Image tag value."
@@ -91,8 +103,8 @@ resource "azurerm_container_group" "iot_container_grp" {
 
     environment_variables = {
       "DB_SERVER"   = azurerm_container_group.sql_server_container.ip_address
-      "DB_NAME"     = "WeatherDb"
-      "DB_USER"     = "sa"
+      "DB_NAME"     = var.DB_NAME
+      "DB_USER"     = var.DB_USER
       "DB_PASSWORD" = var.DB_PASSWORD # Match MSSQL_SA_PASSWORD from SQL container
      }
 
