@@ -48,14 +48,10 @@ stages:
               terraform init -input=false
               terraform apply -input=false -auto-approve
               terraform output -json > tf_outputs.json
-              cat tf_outputs.json
-              DB_SERVER=$(jq -r '.iot_sql_server_ip.value' tf_outputs.json)
               IOT_CONTAINER_NAME=$(jq -r '.iot_webapi_container.value' tf_outputs.json)
               REMOTE_DOCKER_HOST=$(jq -r '.iot_webapi_dns_name.value' tf_outputs.json)
-              echo "Extracted DB_SERVER value: $DB_SERVER"
               echo "Extracted container name value: $IOT_CONTAINER_NAME"
               echo "Extracted container name value: $REMOTE_DOCKER_HOST"
-              echo "##vso[task.setvariable variable=VAR_DB_SERVER;]$DB_SERVER"
               echo "##vso[task.setvariable variable=VAR_REMOTE_DOCKER_HOST;isOutput=true]$REMOTE_DOCKER_HOST"
               echo "##vso[task.setvariable variable=VAR_IOT_CONTAINER_NAME;isOutput=true]$IOT_CONTAINER_NAME"
 
@@ -76,12 +72,13 @@ stages:
     dependsOn: Provision
     condition: succeeded()
     variables:
-      IOT_CONTAINER_NAME: $[dependencies.Provision.ProvisionJob.RunTerraform.outputs['RunTerraform.VAR_IOT_CONTAINER_NAME']]
-      REMOTE_DOCKER_HOST: $[dependencies.Provision.ProvisionJob.RunTerraform.outputs['RunTerraform.VAR_REMOTE_DOCKER_HOST']]
+      IOT_CONTAINER_NAME: $[dependencies.Provision.ProvisionJob.outputs['RunTerraform.VAR_IOT_CONTAINER_NAME']]
+      REMOTE_DOCKER_HOST: $[dependencies.Provision.ProvisionJob.outputs['RunTerraform.VAR_REMOTE_DOCKER_HOST']]
       IOT_CONTAINER_NAME1: $[dependencies.Provision.RunTerraform.outputs['RunTerraform.VAR_IOT_CONTAINER_NAME']]
       REMOTE_DOCKER_HOST1: $[dependencies.Provision.RunTerraform.outputs['RunTerraform.VAR_REMOTE_DOCKER_HOST']]
       IOT_CONTAINER_NAME2: $[dependencies.ProvisionJob.RunTerraform.outputs['RunTerraform.VAR_IOT_CONTAINER_NAME']]
       REMOTE_DOCKER_HOST2: $[dependencies.ProvisionJob.RunTerraform.outputs['RunTerraform.VAR_REMOTE_DOCKER_HOST']]
+      
     jobs:
     - job: Migrate
       displayName: Apply EF Core Migrations
