@@ -81,6 +81,8 @@ stages:
       displayName: Apply EF Core Migrations
       pool:
         vmImage: ubuntu-latest
+      variables:
+        - group: IoTVariables
       steps:
         - script: |
             echo "Installing dotnet-ef tool..."
