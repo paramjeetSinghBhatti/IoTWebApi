@@ -83,9 +83,9 @@ stages:
     condition: succeeded()
     variables:
       system.debug: true
-      deps: $[convertToJson(dependencies)]
-      IOT_CONTAINER_NAME: $[dependencies.Provision.ProvisionJob.outputs['RunTerraform.VAR_IOT_CONTAINER_NAME']]
-      REMOTE_DOCKER_HOST: $[dependencies.Provision.ProvisionJob.outputs['RunTerraform.VAR_REMOTE_DOCKER_HOST']]
+      deps: $[convertToJson(stageDependencies)]
+      IOT_CONTAINER_NAME: $[ stageDependencies.Provision.ProvisionJob.outputs['RunTerraform.VAR_IOT_CONTAINER_NAME'] ]
+      REMOTE_DOCKER_HOST: $[ stageDependencies.Provision.ProvisionJob.outputs['RunTerraform.VAR_REMOTE_DOCKER_HOST'] ]
       
     jobs:
     - job: Migrate
@@ -106,9 +106,10 @@ stages:
             echo "Adding .NET tools to PATH..."
             echo "::add-path::$(Agent.ToolsDirectory)/dotnet/tools"
           displayName: 'Install dotnet-ef'
+        - powershell: Write-Host "$(deps)"
         - script: |
             echo $(deps)
-            echo "Dependencies: $[dependencies]"
+            echo "Dependencies: $[stageDependencies]"
             echo "Setting environment to Production"
             export ASPNETCORE_ENVIRONMENT=Production
             echo "Current ASPNETCORE_ENVIRONMENT: $ASPNETCORE_ENVIRONMENT"
