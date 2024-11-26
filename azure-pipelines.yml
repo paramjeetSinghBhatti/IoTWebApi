@@ -54,6 +54,8 @@ stages:
               echo "Extracted container name value: $REMOTE_DOCKER_HOST"
               echo "##vso[task.setvariable variable=VAR_REMOTE_DOCKER_HOST;isOutput=true]$REMOTE_DOCKER_HOST"
               echo "##vso[task.setvariable variable=VAR_IOT_CONTAINER_NAME;isOutput=true]$IOT_CONTAINER_NAME"
+              echo "##vso[task.setvariable variable=VAR_REMOTE_DOCKER_HOSTX;isOutput=true]$(REMOTE_DOCKER_HOST)"
+              echo "##vso[task.setvariable variable=VAR_IOT_CONTAINER_NAMEX;isOutput=true]$(IOT_CONTAINER_NAME)"
 
             name: 'RunTerraform'
             displayName: 'Run Terraform'
@@ -72,12 +74,11 @@ stages:
     dependsOn: Provision
     condition: succeeded()
     variables:
+      deps: $[convertToJson(dependencies)]
       IOT_CONTAINER_NAME: $[dependencies.Provision.ProvisionJob.outputs['RunTerraform.VAR_IOT_CONTAINER_NAME']]
       REMOTE_DOCKER_HOST: $[dependencies.Provision.ProvisionJob.outputs['RunTerraform.VAR_REMOTE_DOCKER_HOST']]
-      IOT_CONTAINER_NAME1: $[dependencies.Provision.RunTerraform.outputs['RunTerraform.VAR_IOT_CONTAINER_NAME']]
-      REMOTE_DOCKER_HOST1: $[dependencies.Provision.RunTerraform.outputs['RunTerraform.VAR_REMOTE_DOCKER_HOST']]
-      IOT_CONTAINER_NAME2: $[dependencies.ProvisionJob.RunTerraform.outputs['RunTerraform.VAR_IOT_CONTAINER_NAME']]
-      REMOTE_DOCKER_HOST2: $[dependencies.ProvisionJob.RunTerraform.outputs['RunTerraform.VAR_REMOTE_DOCKER_HOST']]
+      IOT_CONTAINER_NAMEX: $[dependencies.Provision.ProvisionJob.outputs['RunTerraform.VAR_IOT_CONTAINER_NAMEX']]
+      REMOTE_DOCKER_HOSTX: $[dependencies.Provision.ProvisionJob.outputs['RunTerraform.VAR_REMOTE_DOCKER_HOSTX']]
       
     jobs:
     - job: Migrate
@@ -99,6 +100,7 @@ stages:
             echo "::add-path::$(Agent.ToolsDirectory)/dotnet/tools"
           displayName: 'Install dotnet-ef'
         - script: |
+            echo $(deps)
             echo "Setting environment to Production"
             export ASPNETCORE_ENVIRONMENT=Production
             echo "Current ASPNETCORE_ENVIRONMENT: $ASPNETCORE_ENVIRONMENT"
