@@ -34,6 +34,8 @@ stages:
   - stage: Provision
     displayName: 'terraforming on Azure'
     dependsOn: Build
+    variables:
+      system.debug: true
     jobs:
       - job: ProvisionJob
         displayName: 'Provisioning Azure resources'
@@ -54,8 +56,6 @@ stages:
               echo "Extracted container name value: $REMOTE_DOCKER_HOST"
               echo "##vso[task.setvariable variable=VAR_REMOTE_DOCKER_HOST;isOutput=true]$REMOTE_DOCKER_HOST"
               echo "##vso[task.setvariable variable=VAR_IOT_CONTAINER_NAME;isOutput=true]$IOT_CONTAINER_NAME"
-              echo "##vso[task.setvariable variable=VAR_REMOTE_DOCKER_HOSTX;isOutput=true]$(REMOTE_DOCKER_HOST)"
-              echo "##vso[task.setvariable variable=VAR_IOT_CONTAINER_NAMEX;isOutput=true]$(IOT_CONTAINER_NAME)"
 
             name: 'RunTerraform'
             displayName: 'Run Terraform'
@@ -74,11 +74,10 @@ stages:
     dependsOn: Provision
     condition: succeeded()
     variables:
+      system.debug: true
       deps: $[convertToJson(dependencies)]
       IOT_CONTAINER_NAME: $[dependencies.Provision.ProvisionJob.outputs['RunTerraform.VAR_IOT_CONTAINER_NAME']]
       REMOTE_DOCKER_HOST: $[dependencies.Provision.ProvisionJob.outputs['RunTerraform.VAR_REMOTE_DOCKER_HOST']]
-      IOT_CONTAINER_NAMEX: $[dependencies.Provision.ProvisionJob.outputs['RunTerraform.VAR_IOT_CONTAINER_NAMEX']]
-      REMOTE_DOCKER_HOSTX: $[dependencies.Provision.ProvisionJob.outputs['RunTerraform.VAR_REMOTE_DOCKER_HOSTX']]
       
     jobs:
     - job: Migrate
@@ -101,15 +100,13 @@ stages:
           displayName: 'Install dotnet-ef'
         - script: |
             echo $(deps)
+            echo "Dependencies: $[dependencies]"
             echo "Setting environment to Production"
             export ASPNETCORE_ENVIRONMENT=Production
             echo "Current ASPNETCORE_ENVIRONMENT: $ASPNETCORE_ENVIRONMENT"
             echo "Container Name: $(IOT_CONTAINER_NAME)"
             echo "REMOTE_DOCKER_HOST: $(REMOTE_DOCKER_HOST)"
-            echo "Container Name1: $(IOT_CONTAINER_NAME1)"
-            echo "REMOTE_DOCKER_HOST1: $(REMOTE_DOCKER_HOST1)"
-            echo "Container Name2: $(IOT_CONTAINER_NAME2)"
-            echo "REMOTE_DOCKER_HOST2: $(REMOTE_DOCKER_HOST2)"
+
             docker ps -a
             echo "Applying EF Core Migrations..."
             docker exec -e ASPNETCORE_ENVIRONMENT=Production $(IOT_CONTAINER_NAME) dotnet ef database update --verbose
