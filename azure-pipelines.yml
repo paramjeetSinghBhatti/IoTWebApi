@@ -73,8 +73,10 @@ stages:
     dependsOn: Provision
     condition: succeeded()
     variables:
-      IOT_CONTAINER_NAME: $[dependencies.Provision.ProvisionJob.outputs['RunTerraform.IOT_CONTAINER_NAME']]
-      REMOTE_DOCKER_HOST: $[dependencies.Provision.ProvisionJob.outputs['RunTerraform.REMOTE_DOCKER_HOST']]
+      IOT_CONTAINER_NAME: $[dependencies.Provision.ProvisionJob.RunTerraform.outputs['RunTerraform.IOT_CONTAINER_NAME']]
+      REMOTE_DOCKER_HOST: $[dependencies.Provision.ProvisionJob.RunTerraform.outputs['RunTerraform.REMOTE_DOCKER_HOST']]
+      IOT_CONTAINER_NAME1: $[dependencies.Provision.RunTerraform.outputs['RunTerraform.IOT_CONTAINER_NAME']]
+      REMOTE_DOCKER_HOST1: $[dependencies.Provision.RunTerraform.outputs['RunTerraform.REMOTE_DOCKER_HOST']]
     jobs:
     - job: Migrate
       displayName: Apply EF Core Migrations
@@ -99,7 +101,9 @@ stages:
             export ASPNETCORE_ENVIRONMENT=Production
             echo "Current ASPNETCORE_ENVIRONMENT: $ASPNETCORE_ENVIRONMENT"
             echo "Container Name: $(IOT_CONTAINER_NAME)"
-            echo "Container Name: $(REMOTE_DOCKER_HOST)"
+            echo "REMOTE_DOCKER_HOST: $(REMOTE_DOCKER_HOST)"
+            echo "Container Name1: $(IOT_CONTAINER_NAME1)"
+            echo "REMOTE_DOCKER_HOST1: $(REMOTE_DOCKER_HOST1)"
             docker ps -a
             echo "Applying EF Core Migrations..."
             docker exec -e ASPNETCORE_ENVIRONMENT=Production $(IOT_CONTAINER_NAME) dotnet ef database update --verbose
