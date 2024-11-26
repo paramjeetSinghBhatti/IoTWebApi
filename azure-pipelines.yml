@@ -48,14 +48,16 @@ stages:
               terraform init -input=false
               terraform apply -input=false -auto-approve
               terraform output -json > tf_outputs.json
+              cat tf_outputs.json
               DB_SERVER=$(jq -r '.iot_sql_server_ip.value' tf_outputs.json)
               IOT_CONTAINER_NAME=$(jq -r '.iot_webapi_container.value' tf_outputs.json)
               REMOTE_DOCKER_HOST=$(jq -r '.iot_webapi_dns_name.value' tf_outputs.json)
               echo "Extracted DB_SERVER value: $DB_SERVER"
               echo "Extracted container name value: $IOT_CONTAINER_NAME"
-              echo "##vso[task.setvariable variable=DB_SERVER;]$DB_SERVER"
-              echo "##vso[task.setvariable variable=REMOTE_DOCKER_HOST;isOutput=true]$REMOTE_DOCKER_HOST"
-              echo "##vso[task.setvariable variable=IOT_CONTAINER_NAME;isOutput=true]$IOT_CONTAINER_NAME"
+              echo "Extracted container name value: $REMOTE_DOCKER_HOST"
+              echo "##vso[task.setvariable variable=VAR_DB_SERVER;]$DB_SERVER"
+              echo "##vso[task.setvariable variable=VAR_REMOTE_DOCKER_HOST;isOutput=true]$REMOTE_DOCKER_HOST"
+              echo "##vso[task.setvariable variable=VAR_IOT_CONTAINER_NAME;isOutput=true]$IOT_CONTAINER_NAME"
 
             name: 'RunTerraform'
             displayName: 'Run Terraform'
@@ -68,20 +70,18 @@ stages:
               TF_VAR_DB_PASSWORD: $(DB_PASSWORD)
               TF_VAR_DB_USER: $(DB_USER)
               TF_VAR_DB_NAME: $(DB_NAME)
-          - script: |
-              echo "Container Name: $IOT_CONTAINER_NAME"
-              echo "REMOTE_DOCKER_HOST: $REMOTE_DOCKER_HOST"
-            displayName: 'Debug Outputs'
 
   - stage: Migrate
     displayName: Apply EF Core Migrations
     dependsOn: Provision
     condition: succeeded()
     variables:
-      IOT_CONTAINER_NAME: $[dependencies.Provision.ProvisionJob.RunTerraform.outputs['RunTerraform.IOT_CONTAINER_NAME']]
-      REMOTE_DOCKER_HOST: $[dependencies.Provision.ProvisionJob.RunTerraform.outputs['RunTerraform.REMOTE_DOCKER_HOST']]
-      IOT_CONTAINER_NAME1: $[dependencies.Provision.RunTerraform.outputs['RunTerraform.IOT_CONTAINER_NAME']]
-      REMOTE_DOCKER_HOST1: $[dependencies.Provision.RunTerraform.outputs['RunTerraform.REMOTE_DOCKER_HOST']]
+      IOT_CONTAINER_NAME: $[dependencies.Provision.ProvisionJob.RunTerraform.outputs['RunTerraform.VAR_IOT_CONTAINER_NAME']]
+      REMOTE_DOCKER_HOST: $[dependencies.Provision.ProvisionJob.RunTerraform.outputs['RunTerraform.VAR_REMOTE_DOCKER_HOST']]
+      IOT_CONTAINER_NAME1: $[dependencies.Provision.RunTerraform.outputs['RunTerraform.VAR_IOT_CONTAINER_NAME']]
+      REMOTE_DOCKER_HOST1: $[dependencies.Provision.RunTerraform.outputs['RunTerraform.VAR_REMOTE_DOCKER_HOST']]
+      IOT_CONTAINER_NAME2: $[dependencies.ProvisionJob.RunTerraform.outputs['RunTerraform.VAR_IOT_CONTAINER_NAME']]
+      REMOTE_DOCKER_HOST2: $[dependencies.ProvisionJob.RunTerraform.outputs['RunTerraform.VAR_REMOTE_DOCKER_HOST']]
     jobs:
     - job: Migrate
       displayName: Apply EF Core Migrations
@@ -109,6 +109,8 @@ stages:
             echo "REMOTE_DOCKER_HOST: $(REMOTE_DOCKER_HOST)"
             echo "Container Name1: $(IOT_CONTAINER_NAME1)"
             echo "REMOTE_DOCKER_HOST1: $(REMOTE_DOCKER_HOST1)"
+            echo "Container Name2: $(IOT_CONTAINER_NAME2)"
+            echo "REMOTE_DOCKER_HOST2: $(REMOTE_DOCKER_HOST2)"
             docker ps -a
             echo "Applying EF Core Migrations..."
             docker exec -e ASPNETCORE_ENVIRONMENT=Production $(IOT_CONTAINER_NAME) dotnet ef database update --verbose
