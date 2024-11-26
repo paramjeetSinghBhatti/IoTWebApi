@@ -68,6 +68,14 @@ stages:
               TF_VAR_DB_PASSWORD: $(DB_PASSWORD)
               TF_VAR_DB_USER: $(DB_USER)
               TF_VAR_DB_NAME: $(DB_NAME)
+      - job: B
+        dependsOn: ProvisionJob
+        variables:
+          cNamefromProvision: $[ dependencies.ProvisionJob.outputs['RunTerraform.VAR_IOT_CONTAINER_NAME'] ]
+          deps: $[convertToJson(dependencies)] # create a variable with the job dependencies
+        steps:
+        - script: echo $(cNamefromProvision) #
+        - powershell: Write-Host "$(deps)"
 
   - stage: Migrate
     displayName: Apply EF Core Migrations
