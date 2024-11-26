@@ -94,8 +94,5 @@ stages:
             echo "Running Azure CLI to apply EF Core migrations..."
             az login --service-principal -u $(ARM_CLIENT_ID) -p $(ARM_CLIENT_SECRET) --tenant $(ARM_TENANT_ID)
 
-            az container exec \\
-              --name $(IOT_CONTAINER_NAME) \\
-              --resource-group iot_sample_rg \\
-              --exec-command "/bin/bash -c 'dotnet ef database update --verbose'"
+            az container exec --name $(IOT_CONTAINER_NAME) --resource-group iot_sample_rg --exec-command "/bin/bash -c 'dotnet ef database update --verbose'"
           displayName: 'Apply EF Core Migrations'
